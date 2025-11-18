@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:pas_mobile_11pplg1_17/controller/data_product_controller.dart';
-
+import 'package:pas_mobile_11pplg1_17/widgets/product_item.dart';
 
 class DataProductPage extends StatelessWidget {
   DataProductPage({super.key});
@@ -10,31 +10,42 @@ class DataProductPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Data Product Page"),),
+      appBar: AppBar(
+        title: const Text("Products"),
+        centerTitle: true,
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+      ),
       body: Container(
-        margin: EdgeInsets.all(10),
-        child: Obx((){
-          if(controller.isLoading.value){
-            return Center(child: CircularProgressIndicator(),);
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        child: Obx(() {
+          if (controller.isLoading.value) {
+            return const Center(child: CircularProgressIndicator());
           }
+
+          final products = controller.dataProducts;
+
+          // Responsive column count
+          final width = MediaQuery.of(context).size.width;
+          final crossAxisCount = width > 900 ? 4 : (width > 600 ? 3 : 2);
+
           return RefreshIndicator(
-            onRefresh: (){
-              return controller.fetchDataProduct();
-            },
-            
-            child: ListView.builder(
-              itemCount: controller.dataProducts.length,
-              itemBuilder: (context, index){
-                final data = controller.dataProducts[index];
-                return Card(child: ListTile(
-                  leading: CircleAvatar(backgroundImage: NetworkImage(data.image),),
-                  // trailing: Text(dog.intPoints),
-                  title: Text("Id " + data.id.toString() + ", Name: " + data.title),
-                  subtitle: Text(data.description),),);
-              }),
+            onRefresh: () => controller.fetchDataProduct(),
+            child: GridView.builder(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: crossAxisCount,
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 12,
+                childAspectRatio: 0.62,
+              ),
+              itemCount: products.length,
+              itemBuilder: (context, index) {
+                final data = products[index];
+                return ProductItem(product: data, index: index);
+              },
+            ),
           );
-        }
-        )
+        }),
       ),
     );
   }

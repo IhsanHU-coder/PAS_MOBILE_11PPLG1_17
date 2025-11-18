@@ -2,68 +2,44 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
 class DBHelper {
-  static final DBHelper _instance = DBHelper._internal();
-  factory DBHelper() => _instance;
-  DBHelper._internal();
-
   static Database? _db;
+  static const String DB_NAME = "favorite.db";
+  static const String TABLE_FAV = "favorites";
 
-  Future<Database> get db async {
+  Future<Database> get database async {
     if (_db != null) return _db!;
-    _db = await _initDb();
+    _db = await initDB();
     return _db!;
   }
 
-  Future<Database> _initDb() async {
+  Future<Database> initDB() async {
     final dbPath = await getDatabasesPath();
-    final path = join(dbPath, 'contacts.db');
+    final path = join(dbPath, DB_NAME);
 
-    return await openDatabase(
-      path,
-      version: 1,
-      onCreate: (db, version) async {
-        await db.execute(
-          'CREATE TABLE contacts(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT)',
-        );
-      },
-    );
+    return await openDatabase(path, version: 1, onCreate: (db, version) async {
+      await db.execute('''
+        CREATE TABLE $TABLE_FAV (
+          id INTEGER PRIMARY KEY,
+          title TEXT,
+          image TEXT,
+          price REAL
+        )
+      ''');
+    });
   }
 
-  Future<int> insertName(String name) async {
-    final client = await db;
-    return client.insert('contacts', {'name': name});
+  Future<int> insert(Map<String, dynamic> data) async {
+    final db = await database;
+    return await db.insert(TABLE_FAV, data, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
-  Future<List<Map<String, dynamic>>> getNames() async {
-    final client = await db;
-    return client.query('contacts', orderBy: 'id DESC');
+  Future<List<Map<String, dynamic>>> getAll() async {
+    final db = await database;
+    return await db.query(TABLE_FAV, orderBy: "id DESC");
   }
 
-//   Future<int> deleteName(String name) async {
-//   final db = await database;
-//   return await db.delete(
-//     'names', // ganti sesuai nama tabel
-//     where: 'name = ?',
-//     whereArgs: [name],
-//   );
-// }
-Future<int> deleteName(String name) async {
-  final client = await db; // pake getter db yang sudah ada
-  return client.delete(
-    'contacts',
-    where: 'name = ?',
-    whereArgs: [name],
-  );
-}
-Future<int> updateName(String oldName, String newName) async {
-  final client = await db;
-  return client.update(
-    'contacts',
-    {'name': newName},
-    where: 'name = ?',
-    whereArgs: [oldName],
-  );
-}
-
-
+  Future<int> delete(int id) async {
+    final db = await database;
+    return await db.delete(TABLE_FAV, where: "id = ?", whereArgs: [id]);
+  }
 }

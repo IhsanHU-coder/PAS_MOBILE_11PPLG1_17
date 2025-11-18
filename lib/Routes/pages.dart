@@ -6,6 +6,7 @@ import 'package:pas_mobile_11pplg1_17/pages/btn_nav_page.dart';
 import 'package:pas_mobile_11pplg1_17/pages/contact_page.dart';
 import 'package:pas_mobile_11pplg1_17/pages/data_product_page.dart';
 import 'package:pas_mobile_11pplg1_17/pages/dog_data_page.dart';
+import 'package:pas_mobile_11pplg1_17/pages/favorite_page.dart';
 import 'package:pas_mobile_11pplg1_17/pages/login_api_page.dart';
 import 'package:pas_mobile_11pplg1_17/pages/premiere_table_page.dart';
 import 'package:pas_mobile_11pplg1_17/pages/register_api_page.dart';
@@ -27,11 +28,6 @@ class AppPages {
     GetPage(
       name: AppRoutes.mainmenu,
       page: () => BtnNavPage(),
-      binding: AllBindings(),
-    ),
-    GetPage(
-      name: AppRoutes.contactPage,
-      page: () => ContactPage(),
       binding: AllBindings(),
     ),
     GetPage(
@@ -59,5 +55,11 @@ class AppPages {
       page: () => RegisterApiPage(),
       binding: AllBindings(),
     ),
+    GetPage(
+      name: AppRoutes.favorite,
+      page: () => FavoritePage(),
+      binding: AllBindings(),
+    ),
+    
   ];
 }

@@ -122,34 +122,27 @@ class RegisterApiPage extends StatelessWidget {
                     )),
                 const SizedBox(height: 24),
 
-                // 🔘 Tombol Login
-                Obx(() => SizedBox(
-                      width: double.infinity,
-                      height: 50,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color.fromARGB(255, 255, 68, 68),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color.fromARGB(255, 255, 68, 68),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      onPressed: () => Get.toNamed(AppRoutes.loginApi),
+                        child: const Text(
+                          "Back",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
-                        onPressed: () => Get.toNamed(AppRoutes.loginApi),
-                        child: controller.isLoading.value
-                            ? const CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 2,
-                              )
-                            : const Text(
-                                "Back",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  letterSpacing: 1.2,
-                                ),
-                              ),
-                      ),
-                    )),
-                const SizedBox(height: 24),
+                      )
+
 
                
                 // 🔹 Info akun demo

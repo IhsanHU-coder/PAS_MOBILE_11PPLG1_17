@@ -8,5 +8,6 @@ class AppRoutes{
   static const String dataProduct = "/dataProduct";
   static const String profile = "/profile";
   static const String registerApi = "/registerApi";
+  static const String favorite= "/favorite";
 
 }

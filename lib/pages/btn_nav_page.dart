@@ -6,6 +6,7 @@ import 'package:pas_mobile_11pplg1_17/pages/Potrait/profile_page.dart';
 import 'package:pas_mobile_11pplg1_17/pages/contact_page.dart';
 import 'package:pas_mobile_11pplg1_17/pages/data_product_page.dart';
 import 'package:pas_mobile_11pplg1_17/pages/dog_data_page.dart';
+import 'package:pas_mobile_11pplg1_17/pages/favorite_page.dart';
 import 'package:pas_mobile_11pplg1_17/pages/premiere_table_page.dart';
 
 
@@ -20,7 +21,8 @@ class BtnNavPage extends StatelessWidget {
     // PremiereTablePage(),
     // ContactPage(),
     DataProductPage(),
-    ProfilePage()
+    FavoritePage(),
+    ProfilePage(),
   ];
 
   @override
@@ -76,9 +78,17 @@ class BtnNavPage extends StatelessWidget {
                 ),
                 ListTile(
                   leading: const Icon(Icons.contact_page),
-                  title: const Text("Profile Page"),
+                  title: const Text("History Page"),
                   onTap: () {
                     controller.changeTab(1);
+                    Get.back();
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.contact_page),
+                  title: const Text("Profile Page"),
+                  onTap: () {
+                    controller.changeTab(2);
                     Get.back();
                   },
                 ),
@@ -120,9 +130,14 @@ class BtnNavPage extends StatelessWidget {
                 label: "Data Product Page",
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.contact_page),
+                icon: Icon(Icons.history),
                 label: "Profile Page",
               ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.person),
+                label: "Profile Page",
+              ),
+              
             ],
           ),
         ));

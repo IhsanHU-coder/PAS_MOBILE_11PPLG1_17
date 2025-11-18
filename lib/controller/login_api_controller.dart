@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
@@ -7,19 +8,30 @@ import 'package:pas_mobile_11pplg1_17/models/login_api_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginApiController extends GetxController {
+  // Text editing controllers
   TextEditingController usernameController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
 
+  // Loading state
   var isLoading = false.obs;
+
+  // Data user untuk profile
+  var savedUsername = ''.obs;
+  var savedEmail = ''.obs;
+  var savedFullname = ''.obs;
+  var savedPassword = ''.obs;
 
   @override
   void onInit() {
     super.onInit();
+    loadSavedData(); // Load data dari SharedPreferences
   }
 
+  // ========================
+  //        LOGIN
+  // ========================
   void loginApi() async {
     if (usernameController.text.isEmpty || passwordController.text.isEmpty) {
-
       Get.snackbar(
         "ERROR",
         "Username dan password tidak boleh kosong",
@@ -27,7 +39,6 @@ class LoginApiController extends GetxController {
         backgroundColor: const Color.fromARGB(63, 112, 111, 111),
         colorText: Colors.black,
       );
-
       return;
     }
 
@@ -35,7 +46,7 @@ class LoginApiController extends GetxController {
 
     try {
       final requestData = {
-        'username' : usernameController.text,
+        'username': usernameController.text,
         'password': passwordController.text,
       };
 
@@ -45,75 +56,43 @@ class LoginApiController extends GetxController {
       );
 
       if (response.statusCode == 200) {
+        final LoginModel loginModel = loginModelFromJson(response.body);
 
-        try {
-          final LoginModel loginModel = loginModelFromJson(response.body);
+        if (loginModel.status) {
+          final prefs = await SharedPreferences.getInstance();
 
-          if (loginModel.status) {
-            print('✅ Login Status: SUCCESS');
+          // Simpan data yang tersedia
+          await prefs.setString("username", usernameController.text);
+          await prefs.setString("password", passwordController.text);
+          await prefs.setString("token", loginModel.token);
 
-            final prefs = await SharedPreferences.getInstance();
-            await prefs.setString("username", usernameController.text);
-            await prefs.setString('token', loginModel.token);
+          // Load data reactive dari SharedPreferences
+          loadSavedData();
 
-            print('💾 Token & Username saved');
-
-            isLoading.value = false;
-            
-
-            Get.snackbar(
-              "BERHASIL",
-              loginModel.message,
-              snackPosition: SnackPosition.BOTTOM,
-              backgroundColor: Colors.green[100],
-              colorText: Colors.black,
-            );
-
-            
-
-            await Future.delayed(const Duration(milliseconds: 5000));
-
-            Get.offAllNamed(AppRoutes.mainmenu);
-          } else {
-            print('❌ Login Status: FAILED');
-
-            isLoading.value = false;
-
-            
-
-            Get.snackbar(
-              "ERROR",
-              loginModel.message,
-              snackPosition: SnackPosition.BOTTOM,
-              backgroundColor: Colors.red[100],
-              colorText: Colors.black,
-            );
-
-            print('========================================');
-            print('❌ LOGIN FAILED');
-            print('========================================\n');
-          }
-        } catch (e) {
           isLoading.value = false;
 
-          print('\n❌ JSON PARSE ERROR: $e');
-          print('Raw Response: ${response.body}');
+          Get.snackbar(
+            "BERHASIL",
+            loginModel.message,
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.green[100],
+            colorText: Colors.black,
+          );
 
+          await Future.delayed(const Duration(milliseconds: 1000));
+          Get.offAllNamed(AppRoutes.mainmenu);
+        } else {
+          isLoading.value = false;
           Get.snackbar(
             "ERROR",
-            "Error parsing response: $e",
+            loginModel.message,
             snackPosition: SnackPosition.BOTTOM,
             backgroundColor: Colors.red[100],
             colorText: Colors.black,
           );
         }
       } else {
-        // ===============================
-        //      SERVER ERROR ≠ 200
-        // ===============================
-        print('❌ Status Code: ${response.statusCode}');
         isLoading.value = false;
-
         Get.snackbar(
           "ERROR",
           "Server error: ${response.statusCode}",
@@ -123,13 +102,7 @@ class LoginApiController extends GetxController {
         );
       }
     } catch (e) {
-      // ===============================
-      //          EXCEPTION
-      // ===============================
       isLoading.value = false;
-
-      print('\n❌❌ EXCEPTION: $e');
-
       Get.snackbar(
         "ERROR",
         "Terjadi kesalahan: $e",
@@ -140,26 +113,32 @@ class LoginApiController extends GetxController {
     }
   }
 
-  // ==============================
-  //            LOGOUT
-  // ==============================
-  void logout() async {
-    print('\n========================================');
-    print('🚪 LOGOUT STARTED');
-    print('========================================');
+  // ========================
+  //     LOAD DATA PROFILE
+  // ========================
+  Future<void> loadSavedData() async {
+    final prefs = await SharedPreferences.getInstance();
+    savedUsername.value = prefs.getString('username') ?? '';
+    savedPassword.value = prefs.getString('password') ?? '';
+    savedEmail.value = prefs.getString('email') ?? 'Belum ada email';
+    savedFullname.value = prefs.getString('fullname') ?? 'Belum ada nama';
+  }
 
+  // ========================
+  //        LOGOUT
+  // ========================
+  void logout() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-
-      await prefs.remove("username");
-      await prefs.remove("token");
+      await prefs.clear();
 
       usernameController.clear();
       passwordController.clear();
 
-      print('🧹 SharedPreferences cleared');
-
-      
+      savedUsername.value = '';
+      savedPassword.value = '';
+      savedEmail.value = '';
+      savedFullname.value = '';
 
       Get.snackbar(
         "LOGOUT",
@@ -169,17 +148,9 @@ class LoginApiController extends GetxController {
         colorText: Colors.black,
       );
 
-       await Future.delayed(const Duration(milliseconds: 5000));
-
+      await Future.delayed(const Duration(milliseconds: 1000));
       Get.offAllNamed(AppRoutes.loginApi);
-      
-
-      print('========================================');
-      print('✅ LOGOUT COMPLETED');
-      print('========================================\n');
     } catch (e) {
-      print('❌ Logout Error: $e');
-
       Get.snackbar(
         "ERROR",
         "Gagal logout API: $e",
